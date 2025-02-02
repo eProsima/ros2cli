@@ -2,8 +2,8 @@
 Changelog for package ros2topic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.37.0 (2025-02-02)
+-------------------
 * support multiple fields in ros2topic echo (`#964 <https://github.com/ros2/ros2cli/issues/964>`_)
 * Contributors: SangtaekLee
 

@@ -2,8 +2,8 @@
 Changelog for package ros2service
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.37.0 (2025-02-02)
+-------------------
 * Maintaining consistency of automatically putting time stamps in the service and action calls similiar to publishing in rostopics. (`#961 <https://github.com/ros2/ros2cli/issues/961>`_)
 * Contributors: Sukhvansh Jain, Tomoya Fujita
 

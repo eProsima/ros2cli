@@ -2,8 +2,8 @@
 Changelog for package ros2cli
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.37.0 (2025-02-02)
+-------------------
 * Rename the test\_{daemon,direct}.py tests. (`#959 <https://github.com/ros2/ros2cli/issues/959>`_)
 * Contributors: Chris Lalancette
 
