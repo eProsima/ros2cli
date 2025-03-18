@@ -33,6 +33,8 @@ import pytest
 import rclpy
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.qos import DurabilityPolicy
+from rclpy.qos import qos_check_compatible
+from rclpy.qos import QoSCompatibility
 from rclpy.qos import QoSProfile
 from rclpy.qos import ReliabilityPolicy
 from rclpy.utilities import get_rmw_implementation_identifier
@@ -115,10 +117,22 @@ class TestROS2TopicBwDelayHz(unittest.TestCase):
                         verb_extra_options = [
                             '--qos-reliability', 'reliable',
                             '--qos-durability', 'transient_local']
+                        # This QoS profile matched with the extra options defined above
+                        rostopic_qos_profile = QoSProfile(
+                            depth=10,
+                            reliability=ReliabilityPolicy.RELIABLE,
+                            durability=DurabilityPolicy.TRANSIENT_LOCAL)
                         publisher_qos_profile = QoSProfile(
                             depth=10,
                             reliability=ReliabilityPolicy.BEST_EFFORT,
                             durability=DurabilityPolicy.VOLATILE)
+                        # Skip this test if the QoS between the publisher and subscription
+                        # are compatible according to the underlying middleware.
+                        comp, reason = qos_check_compatible(
+                            rostopic_qos_profile, publisher_qos_profile)
+                        if comp == QoSCompatibility.OK or comp == QoSCompatibility.WARNING:
+                            raise unittest.SkipTest()
+
                 publisher = self.node.create_publisher(PointStamped, topic, publisher_qos_profile)
                 assert publisher
 
