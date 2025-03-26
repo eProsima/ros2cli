@@ -35,6 +35,7 @@ import launch_testing_ros.tools
 import pytest
 
 from rclpy.utilities import get_available_rmw_implementations
+from ros2cli.helpers import get_rmw_additional_env
 
 
 # Skip cli tests on Windows while they exhibit pathological behavior
@@ -49,10 +50,8 @@ if sys.platform.startswith('win'):
 @launch_testing.parametrize('rmw_implementation', get_available_rmw_implementations())
 def generate_test_description(rmw_implementation):
     path_to_fixtures = os.path.join(os.path.dirname(__file__), 'fixtures')
-    additional_env = {
-        'RMW_IMPLEMENTATION': rmw_implementation, 'PYTHONUNBUFFERED': '1'
-    }
-
+    additional_env = get_rmw_additional_env(rmw_implementation)
+    additional_env['PYTHONUNBUFFERED'] = '1'
     path_to_talker_node_script = os.path.join(path_to_fixtures, 'talker_node.py')
     path_to_listener_node_script = os.path.join(path_to_fixtures, 'listener_node.py')
 
@@ -167,12 +166,11 @@ class TestROS2TopicCLI(unittest.TestCase):
 
         @contextlib.contextmanager
         def launch_topic_command(self, arguments):
+            additional_env = get_rmw_additional_env(rmw_implementation)
+            additional_env['PYTHONUNBUFFERED'] = '1'
             topic_command_action = ExecuteProcess(
                 cmd=['ros2', 'topic', *arguments],
-                additional_env={
-                    'RMW_IMPLEMENTATION': rmw_implementation,
-                    'PYTHONUNBUFFERED': '1'
-                },
+                additional_env=additional_env,
                 name='ros2topic-cli',
                 output='screen'
             )

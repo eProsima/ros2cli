@@ -35,6 +35,7 @@ from osrf_pycommon.terminal_color import remove_ansi_escape_sequences
 import pytest
 
 from rclpy.utilities import get_available_rmw_implementations
+from ros2cli.helpers import get_rmw_additional_env
 
 
 # Skip cli tests on Windows while they exhibit pathological behavior
@@ -51,6 +52,7 @@ def generate_test_description(rmw_implementation):
     path_to_action_server_executable = os.path.join(
         os.path.dirname(__file__), 'fixtures', 'fibonacci_action_introspection.py'
     )
+    additional_env = get_rmw_additional_env(rmw_implementation)
     return LaunchDescription([
         # Always restart daemon to isolate tests.
         ExecuteProcess(
@@ -63,11 +65,11 @@ def generate_test_description(rmw_implementation):
                     on_exit=[
                         ExecuteProcess(
                             cmd=[sys.executable, path_to_action_server_executable],
-                            additional_env={'RMW_IMPLEMENTATION': rmw_implementation}
+                            additional_env=additional_env
                         ),
                         launch_testing.actions.ReadyToTest()
                     ],
-                    additional_env={'RMW_IMPLEMENTATION': rmw_implementation}
+                    additional_env=additional_env
                 )
             ]
         ),
@@ -86,13 +88,12 @@ class TestROS2ActionCLI(unittest.TestCase):
     ):
         @contextlib.contextmanager
         def launch_action_command(self, arguments):
+            additional_env = get_rmw_additional_env(rmw_implementation)
+            additional_env['PYTHONUNBUFFERED'] = '1'
             action_command_action = ExecuteProcess(
                 cmd=['ros2', 'action', *arguments],
                 name='ros2action-cli', output='screen',
-                additional_env={
-                    'RMW_IMPLEMENTATION': rmw_implementation,
-                    'PYTHONUNBUFFERED': '1'
-                }
+                additional_env=additional_env
             )
             with launch_testing.tools.launch_process(
                 launch_service, action_command_action, proc_info, proc_output,
