@@ -16,6 +16,8 @@ import time
 from typing import Optional
 from typing import TypeVar
 
+import argcomplete
+
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
@@ -25,7 +27,7 @@ from ros2cli.node.direct import DirectNode
 from ros2topic.api import add_qos_arguments
 from ros2topic.api import positive_float
 from ros2topic.api import profile_configure_short_keys
-from ros2topic.api import TopicMessagePrototypeCompleter
+from ros2topic.api import TopicMessagePrototypeCompleter, YamlCompletionFinder
 from ros2topic.api import TopicNameCompleter
 from ros2topic.api import TopicTypeCompleter
 from ros2topic.verb import VerbExtension
@@ -108,6 +110,10 @@ class PubVerb(VerbExtension):
         parser.add_argument(
             '-n', '--node-name',
             help='Name of the created publishing node')
+
+        # Use the custom completion finder
+        argcomplete.autocomplete = YamlCompletionFinder(parser)
+
         add_qos_arguments(parser, 'publish', 'default')
         add_direct_node_arguments(parser)
 
@@ -173,7 +179,17 @@ def publisher(
     if yaml_file:
         msg_reader = read_msg_from_yaml(yaml_file)
     else:
-        values_dictionary = yaml.safe_load(values)
+        try:
+            # Handle cases where the user pastes the autocompleted bash safe string
+            if '^J' in values:
+                values = values.replace("'", '')
+                values = values.replace('^J', '\n')
+
+            values_dictionary = yaml.safe_load(values)
+
+        except (yaml.parser.ParserError, yaml.scanner.ScannerError):
+            return 'The passed value needs to be in YAML string or a dictionary'
+
         if not isinstance(values_dictionary, dict):
             return 'The passed value needs to be a dictionary in YAML format'
 
